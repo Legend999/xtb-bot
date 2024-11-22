@@ -9,35 +9,60 @@ interface BuyStockData {
   price: number;
 }
 
-const fillNumberInput = async (page: Page, selector: string, value: number) => {
-  const priceInput = await page.waitForSelector(selector);
+const BOT_LIST_NAME = "XtbBot";
 
-  const boundingBox = await priceInput!.boundingBox();
+const clickHiddenElement = async (container: ElementHandle | Page, selector: string) => {
+  await container.$eval(selector, (el) => (el as HTMLElement).click());
+}
+
+const clearInput = async (page: Page, input: ElementHandle) => {
+  const boundingBox = await input!.boundingBox();
   await page.mouse.click(
     boundingBox!.x + boundingBox!.width / 2,
     boundingBox!.y + boundingBox!.height / 2,
     { count: 3 }
   );
-  await priceInput!.press('Backspace');
+  await input!.press('Backspace');
+}
+
+const fillNumberInput = async (page: Page, selector: string, value: number) => {
+  const priceInput = await page.waitForSelector(selector);
+
+  await clearInput(page, priceInput!);
 
   await priceInput!.type(value.toString());
 }
 
-const buyStock = async (page: Page, data: BuyStockData) => {
+const findStock = async (page: Page, symbol: string) => {
   const searchBarInput = await page.waitForSelector('.xs-symbol-search-bar-input-wrapper input.xs-symbol-search-bar-input');
-  await searchBarInput!.type(data.symbol);
 
-  const stockContainer = await page.waitForSelector(
+  await clearInput(page, searchBarInput!);
+
+  await searchBarInput!.type(symbol);
+
+  return await page.waitForSelector(
     '::-p-xpath(//div[contains(@class, "single-symbol-container") and ' +
     '(.//span[contains(@class, "asset-class") and (text()="Stock" or text()="Akcje")]) and ' +
-    `.//p[contains(@class, "group-id") and starts-with(normalize-space(text()), "${data.symbol}")]])`
+    `.//p[contains(@class, "group-id") and starts-with(normalize-space(text()), "${symbol}")]])`
   );
+}
 
-  const orderButton = await stockContainer!.$('::-p-xpath(.//div[contains(@class, "mw-ct-ticket-btn-icon")])');
-  await orderButton!.click();
+const buyStock = async (page: Page, data: BuyStockData) => {
+  const stockContainer = await findStock(page, data.symbol);
+
+  await clickHiddenElement(stockContainer!, '.mw-ct-ticket-btn.mw-btn-menu');
 
   const stopLimitTab = await page.waitForSelector('ul.nav-tabs li[select="tabSelected(\'pending\')"] a');
   await stopLimitTab!.click();
+
+  const isMarketClosed = await page.evaluate(
+    (tab) => !!tab.querySelector('.mw-ticket-session-tab-icon.mw-session-type-closed-ticket-icon'),
+    stopLimitTab!
+  );
+
+  if (isMarketClosed) {
+    throw new Error('The market is closed. Cannot proceed.');
+  }
 
   // volume must be set first because otherwise changing the price affects the volume input element
   await fillNumberInput(page, 'div[data-id="volume.volume"] input[name="stepperInput"].xs-stepper-input', data.volume);
@@ -67,6 +92,27 @@ const fetchAccounts = async (page: Page) => {
   });
 
   console.log(accounts);
+}
+
+const handleCreateWatchList = async (page: Page) => {
+  if (!await page.$(`span[title="${BOT_LIST_NAME}"]`)) {
+    await clickHiddenElement(page, 'button[data-create-group-btn]');
+
+    const fullName = await page.waitForSelector('input[ng-model="fullName"]');
+    await fullName!.type(BOT_LIST_NAME);
+
+    const shortName = await page.waitForSelector('input[ng-model="shortName"]');
+    await shortName!.type('BOT');
+
+    const saveButton = await page.waitForSelector('.xs-popup-add-update-group-save');
+    await saveButton!.click();
+
+    const stockContainer = await findStock(page, "META.US");
+    await clickHiddenElement(stockContainer!, '.xs-button-icon.xs-button-add-to-group');
+
+    const addToXtbBotGroup = await page.waitForSelector(`::-p-xpath(//li[.//span[text()="${BOT_LIST_NAME}"]])`);
+    await addToXtbBotGroup!.click();
+  }
 }
 
 const handleXtb = async (browser: Browser) => {
@@ -112,6 +158,8 @@ const handleXtb = async (browser: Browser) => {
   );
 
   console.log(`Account value: ${accountValue}`);
+
+  await handleCreateWatchList(page);
 
   await fetchAccounts(page);
 
