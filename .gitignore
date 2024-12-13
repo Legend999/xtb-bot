@@ -1,5 +1,4 @@
-.env
-package-lock.json
-dist/
-node_modules/
-.idea/
+.idea
+node_modules
+dist
+*.generated.ts

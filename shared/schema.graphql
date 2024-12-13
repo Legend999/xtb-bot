@@ -1,0 +1,6 @@
+type Query {
+    test: String!
+}
+type Mutation {
+    logIn(email: String!, password: String!): Boolean!
+}

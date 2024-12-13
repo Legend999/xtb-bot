@@ -1,0 +1,30 @@
+{
+  "name": "xtb-bot-frontend",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "engines": {
+    "node": "^22"
+  },
+  "scripts": {
+    "build": "npm run lint && vite build",
+    "dev": "vite",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0 && tsc",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.12.2",
+    "graphql": "^16.9.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "vite": "^6.0.3"
+  }
+}
