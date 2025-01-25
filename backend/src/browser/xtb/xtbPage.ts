@@ -1,10 +1,18 @@
+import _ from 'lodash';
 import { Browser, Page } from 'puppeteer';
-import { USER_AGENT } from '../../constants/page.js';
-import { ONE_SECOND_IN_MILLISECONDS } from '../../constants/time.js';
+import logIn from 'src/browser/xtb/actions/logIn.js';
+import watchPriceChange from 'src/browser/xtb/actions/watchPriceChange.js';
+import { USER_AGENT } from 'src/constants/page.js';
+import { ONE_SECOND_IN_MILLISECONDS } from 'src/constants/time.js';
+import ApiPubSub, { StockPriceChangeType } from 'src/graphql/ApiPubSub.js';
+import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
+import { Account } from 'src/graphql/resolvers.generated.js';
 
 export default class XtbPage {
+  public readonly page: Page;
+  private lastStockPrices: StockPriceChangeType | null = null;
+  private watchPriceChangeIntervalId: NodeJS.Timeout | null = null;
   private loggedIn: boolean = false;
-  private readonly page: Page;
 
   private constructor(page: Page) {
     this.page = page;
@@ -19,15 +27,29 @@ export default class XtbPage {
     return new XtbPage(page);
   }
 
-  public get(): Page {
-    return this.page;
+  public async logIn(email: string, password: string): Promise<Account[]> {
+    if (this.loggedIn) {
+      throw new GraphQLUserFriendlyError('You are already logged in.');
+    }
+    const accounts = await logIn(email, password, this.page);
+    this.loggedIn = true;
+    return accounts;
   }
 
-  public isLoggedIn(): boolean {
-    return this.loggedIn;
+  public checkStockPriceChangeAndUpdate(newStockPrices: StockPriceChangeType): boolean {
+    if (_.isEqual(newStockPrices, this.lastStockPrices)) {
+      return false;
+    }
+    this.lastStockPrices = newStockPrices;
+    return true;
   }
 
-  public setLoggedIn(loggedIn: boolean) {
-    this.loggedIn = loggedIn;
+  public async subscribeToPriceChange(pubsub: ApiPubSub): Promise<void> {
+    if (!this.loggedIn) {
+      throw new GraphQLUserFriendlyError('You need to be logged in to subscribe to price change.');
+    }
+    if (!this.watchPriceChangeIntervalId) {
+      this.watchPriceChangeIntervalId = await watchPriceChange(this, pubsub);
+    }
   }
 }

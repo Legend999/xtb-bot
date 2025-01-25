@@ -2,5 +2,37 @@ type Query {
     test: String!
 }
 type Mutation {
-    logIn(email: String!, password: String!): Boolean!
+    logIn(email: String!, password: String!): [Account!]!
+}
+type Subscription {
+    stocksPriceChange: StocksPriceChangeResult!
+}
+union StocksPriceChangeResult = StockPriceChangeData | StockPriceChangeError
+type StockPriceChangeData {
+    stocks: [Stock!]!
+}
+type StockPriceChangeError {
+    errorMessage: String!
+}
+type Stock {
+    name: String!
+    price: StockPrice!
+}
+type StockPrice {
+    ask: Float!
+    bid: Float!
+}
+type Account {
+    type: AccountType!
+    number: String!
+    currency: AccountCurrency!
+}
+enum AccountType {
+    REAL
+    DEMO
+}
+enum AccountCurrency {
+    USD
+    EUR
+    PLN
 }

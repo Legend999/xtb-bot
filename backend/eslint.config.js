@@ -1,6 +1,7 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import nodePlugin from "eslint-plugin-n";
+import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
 
 export default [
   {
@@ -15,6 +16,9 @@ export default [
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   {
+    plugins: {
+      "no-relative-import-paths": noRelativeImportPaths,
+    },
     settings: {
       react: {
         version: "detect",
@@ -48,6 +52,7 @@ export default [
       "eqeqeq": "error",
       "no-console": "error",
       "n/no-extraneous-import": "off", // https://github.com/eslint-community/eslint-plugin-n/issues/209
+      "no-relative-import-paths/no-relative-import-paths": "error",
     },
   },
 ];

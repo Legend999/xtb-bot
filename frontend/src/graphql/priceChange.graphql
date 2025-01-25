@@ -1,0 +1,16 @@
+subscription WatchPrice {
+    stocksPriceChange {
+        ... on StockPriceChangeData {
+            stocks {
+                name
+                price {
+                    ask
+                    bid
+                }
+            }
+        }
+        ...on StockPriceChangeError {
+            errorMessage
+        }
+    }
+}

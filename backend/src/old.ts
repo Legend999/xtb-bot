@@ -1,10 +1,10 @@
-// import {ElementHandle, Page} from 'puppeteer';
+// import { ElementHandle, Page } from 'puppeteer';
 // import {
 //   clearInput,
 //   clickHiddenElement,
 //   fillNumberInput,
 // } from '../browser/utils.js';
-// import {ONE_SECOND_IN_MILLISECONDS} from '../constants/time.js';
+// import { ONE_SECOND_IN_MILLISECONDS } from '../constants/time.js';
 //
 // interface BuyStockData {
 //   symbol: string;

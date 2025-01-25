@@ -3,6 +3,7 @@ import reactPlugin from "eslint-plugin-react";
 import hooksPlugin from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
 
 export default [
   {
@@ -26,6 +27,7 @@ export default [
     plugins: {
       "react-hooks": hooksPlugin,
       "react-refresh": reactRefresh,
+      "no-relative-import-paths": noRelativeImportPaths,
     },
     languageOptions: {
       parserOptions: {
@@ -39,6 +41,7 @@ export default [
       ...hooksPlugin.configs.recommended.rules,
       "react/jsx-fragments": ["error", "syntax"],
       "react/jsx-filename-extension": ["error", {extensions: [".tsx"]}],
+      "react/no-array-index-key": "error",
       "react-refresh/only-export-components": "error",
       "@typescript-eslint/consistent-indexed-object-style": ["error", "index-signature"],
       "@typescript-eslint/no-explicit-any": "off",
@@ -59,6 +62,7 @@ export default [
       }],
       "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
       "no-console": "error",
+      "no-relative-import-paths/no-relative-import-paths": "error",
       "eqeqeq": "error",
     },
   },

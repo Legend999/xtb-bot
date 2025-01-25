@@ -14,7 +14,10 @@
   },
   "dependencies": {
     "@apollo/client": "^3.12.2",
-    "graphql": "^16.9.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/montserrat": "^5.1.0",
+    "@mui/material": "^6.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -25,6 +28,7 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
-    "vite": "^6.0.3"
+    "vite": "^6.0.3",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
