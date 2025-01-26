@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { Browser, Page } from 'puppeteer';
+import { fetchAccounts } from 'src/browser/xtb/actions/fetchAccounts.js';
 import logIn from 'src/browser/xtb/actions/logIn.js';
 import watchPriceChange from 'src/browser/xtb/actions/watchPriceChange.js';
 import { USER_AGENT } from 'src/constants/page.js';
@@ -27,13 +28,24 @@ export default class XtbPage {
     return new XtbPage(page);
   }
 
-  public async logIn(email: string, password: string): Promise<Account[]> {
+  public getLoggedIn(): boolean {
+    return this.loggedIn;
+  }
+
+  public async getAccounts(): Promise<Account[]> {
+    if (!this.loggedIn) {
+      throw new GraphQLUserFriendlyError('You are already logged in.');
+    }
+
+    return await fetchAccounts(this.page);
+  }
+
+  public async logIn(email: string, password: string): Promise<void> {
     if (this.loggedIn) {
       throw new GraphQLUserFriendlyError('You are already logged in.');
     }
-    const accounts = await logIn(email, password, this.page);
+    await logIn(email, password, this.page);
     this.loggedIn = true;
-    return accounts;
   }
 
   public checkStockPriceChangeAndUpdate(newStockPrices: StockPriceChangeType): boolean {

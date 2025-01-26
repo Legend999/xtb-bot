@@ -1,14 +1,8 @@
 import { ElementHandle, HTTPResponse, Page, TimeoutError } from 'puppeteer';
 import { clearInput } from 'src/browser/utils.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
-import {
-  Account,
-  AccountCurrency,
-  AccountType,
-} from 'src/graphql/resolvers.generated.js';
-import { toEnum } from 'src/utils/enum.js';
 
-export default async (email: string, password: string, page: Page): Promise<Account[]> => {
+export default async (email: string, password: string, page: Page) => {
   const loginInput = await page.waitForSelector('input[name=\'xslogin\']');
   const passwordInput = await page.waitForSelector('input[name=\'xspass\']');
   const loginButton = await page.waitForSelector('input.xs-btn.xs-btn-ok-login');
@@ -40,28 +34,6 @@ export default async (email: string, password: string, page: Page): Promise<Acco
 
   // Account value is (one of) the last element(s) to load, ensuring actions occur on a fully loaded page to prevent errors
   await fetchAccountValue(page);
-
-  return await fetchAccounts(page);
-};
-
-const fetchAccounts = async (page: Page): Promise<Account[]> => {
-  const data = await page.evaluate(() => {
-    const accountListElements = document.querySelectorAll('xs-combobox[title="Change account"] .dropdown-menu li, xs-combobox[title="Zmień konto"] .dropdown-menu li');
-
-    return Array.from(accountListElements).map((item) => {
-      const type = item.querySelector('.xs-account-label-server-part')!.textContent!;
-      const number = item.querySelector('.xs-account-label-login-part')!.textContent!;
-      const currency = item.querySelector('.xs-account-label-currency-part')!.textContent!;
-
-      return {type, number, currency};
-    });
-  });
-
-  return data.map(({type, number, currency}) => ({
-    type: toEnum(AccountType, type),
-    number: number,
-    currency: toEnum(AccountCurrency, currency),
-  }));
 };
 
 const fetchAccountValue = async (page: Page) => {

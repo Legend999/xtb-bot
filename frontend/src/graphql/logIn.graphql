@@ -1,7 +1,3 @@
 mutation LogIn($email: String!, $password: String!) {
-    accounts: logIn(email: $email, password: $password) {
-        type
-        number
-        currency
-    }
+    logIn(email: $email, password: $password)
 }

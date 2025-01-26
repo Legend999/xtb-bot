@@ -1,0 +1,7 @@
+query AccountList {
+    accountList {
+        type
+        number
+        currency
+    }
+}

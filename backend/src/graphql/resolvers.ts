@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import { STOCKS_PRICE_CHANGE } from 'src/constants/subscription.js';
+import { StockPriceChangeType } from 'src/graphql/ApiPubSub.js';
 import {
   Resolvers,
   Stock,
@@ -9,16 +9,18 @@ import { Context } from 'src/server/apolloServer.js';
 
 export const resolvers: Resolvers<Context> = {
   Query: {
-    test: () => 'Test',
+    loggedIn: (_, __, {xtbPage}) => xtbPage.getLoggedIn(),
+    accountList: async (_, __, {xtbPage}) => await xtbPage.getAccounts(),
   },
   Mutation: {
     logIn: async (_, {email, password}, {xtbPage}) => {
-      return await xtbPage.logIn(email, password);
+      await xtbPage.logIn(email, password);
+      return true;
     },
   },
   Subscription: {
     stocksPriceChange: {
-      resolve: _.identity,
+      resolve: (payload: StockPriceChangeType) => payload,
       subscribe: async (_, __, {xtbPage, pubsub}) => {
         await xtbPage.subscribeToPriceChange(pubsub);
         return pubsub.asyncIterableIterator(STOCKS_PRICE_CHANGE);

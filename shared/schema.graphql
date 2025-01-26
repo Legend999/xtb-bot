@@ -1,8 +1,9 @@
 type Query {
-    test: String!
+    loggedIn: Boolean!
+    accountList: [Account!]!
 }
 type Mutation {
-    logIn(email: String!, password: String!): [Account!]!
+    logIn(email: String!, password: String!): Boolean!
 }
 type Subscription {
     stocksPriceChange: StocksPriceChangeResult!

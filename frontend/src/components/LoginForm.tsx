@@ -1,4 +1,4 @@
-import StockPriceUpdates from '@components/StockPriceUpdates.tsx';
+import { LoggedInDocument } from '@graphql/loggedIn.generated.ts';
 import { useLogInMutation } from '@graphql/logIn.generated';
 import useSafeAsync from '@hooks/useSafeAsync.ts';
 import {
@@ -15,13 +15,14 @@ function LogInForm() {
   const safeAsync = useSafeAsync();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [logIn, {loading, error, data}] = useLogInMutation();
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [logIn, {
+    loading,
+    error,
+  }] = useLogInMutation({refetchQueries: [LoggedInDocument]});
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     await logIn({variables: {email, password}});
-    setLoggedIn(true);
   };
 
   return (
@@ -69,12 +70,6 @@ function LogInForm() {
           Error: {error.message}
         </Typography>
       )}
-      {data && (
-        <Typography style={{marginTop: '1rem', display: 'block'}}>
-          {data.accounts.map((value) => `${value.type} ${value.number} ${value.currency}`)}
-        </Typography>
-      )}
-      {loggedIn && <StockPriceUpdates/>}
     </Paper>
   );
 }
