@@ -1,5 +1,7 @@
 import { ElementHandle, HTTPResponse, Page, TimeoutError } from 'puppeteer';
 import { clearInput } from 'src/browser/utils.js';
+import ensureWatchListExists
+  from 'src/browser/xtb/actions/ensureWatchListExists.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
 
 export default async (email: string, password: string, page: Page) => {
@@ -34,6 +36,8 @@ export default async (email: string, password: string, page: Page) => {
 
   // Account value is (one of) the last element(s) to load, ensuring actions occur on a fully loaded page to prevent errors
   await fetchAccountValue(page);
+
+  await ensureWatchListExists(page);
 };
 
 const fetchAccountValue = async (page: Page) => {

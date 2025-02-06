@@ -7,6 +7,7 @@ import {
 } from '@apollo/client';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions/index';
 import { getMainDefinition } from '@apollo/client/utilities';
+import ErrorNotification from '@components/ErrorNotification.tsx';
 import {
   createTheme,
   CssBaseline,
@@ -15,6 +16,7 @@ import {
 } from '@mui/material';
 import { Kind, OperationTypeNode } from 'graphql';
 import { createClient } from 'graphql-ws';
+import { SnackbarProvider } from 'notistack';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/montserrat/300.css'; // Light
 import '@fontsource/montserrat/400.css'; // Regular
@@ -81,7 +83,15 @@ createRoot(document.getElementById('root')!).render(
   <ApolloProvider client={client}>
     <ThemeProvider theme={theme}>
       <CssBaseline/>
-      <App/>
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+        Components={{
+          error: ErrorNotification,
+        }}
+      >
+        <App/>
+      </SnackbarProvider>
     </ThemeProvider>
   </ApolloProvider>,
 );

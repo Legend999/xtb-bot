@@ -15,6 +15,9 @@
       "@components/*": [
         "src/components/*"
       ],
+      "@contexts/*": [
+        "src/contexts/*"
+      ],
       "@graphql/*": [
         "src/graphql/*"
       ],

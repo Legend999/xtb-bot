@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import { Browser, Page } from 'puppeteer';
+import addStockToWatchList
+  from 'src/browser/xtb/actions/addStockToWatchList.js';
 import { fetchAccounts } from 'src/browser/xtb/actions/fetchAccounts.js';
 import logIn from 'src/browser/xtb/actions/logIn.js';
 import watchPriceChange from 'src/browser/xtb/actions/watchPriceChange.js';
@@ -46,6 +48,13 @@ export default class XtbPage {
     }
     await logIn(email, password, this.page);
     this.loggedIn = true;
+  }
+
+  public async addStockToWatchList(fullTicker: string): Promise<void> {
+    if (!this.loggedIn) {
+      throw new GraphQLUserFriendlyError('You need to be logged in to add stock to watch list.');
+    }
+    await addStockToWatchList(fullTicker, this.page);
   }
 
   public checkStockPriceChangeAndUpdate(newStockPrices: StockPriceChangeType): boolean {

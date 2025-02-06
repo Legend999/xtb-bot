@@ -1,0 +1,3 @@
+mutation AddStockToWatchList($fullTicker: String!) {
+    addStockToWatchList(fullTicker: $fullTicker)
+}

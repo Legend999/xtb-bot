@@ -17,6 +17,10 @@ export const resolvers: Resolvers<Context> = {
       await xtbPage.logIn(email, password);
       return true;
     },
+    addStockToWatchList: async (_, {fullTicker}, {xtbPage}) => {
+      await xtbPage.addStockToWatchList(fullTicker);
+      return true;
+    },
   },
   Subscription: {
     stocksPriceChange: {
