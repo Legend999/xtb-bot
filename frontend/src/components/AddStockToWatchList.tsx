@@ -23,8 +23,7 @@ function StockPriceUpdates() {
       if (error instanceof ApolloError) {
         enqueueSnackbar(error.message, {variant: 'error'});
       } else {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        throw error;
       }
     }
   };
@@ -37,7 +36,7 @@ function StockPriceUpdates() {
         variant="outlined"
         fullWidth
         value={fullTicker}
-        onChange={(e) => { setFullTicker(e.target.value); }}
+        onChange={(e) => { setFullTicker(e.target.value.toUpperCase()); }}
       />
       <Button
         variant="contained"

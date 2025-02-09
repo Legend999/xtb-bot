@@ -36,9 +36,8 @@ export default class XtbPage {
 
   public async getAccounts(): Promise<Account[]> {
     if (!this.loggedIn) {
-      throw new GraphQLUserFriendlyError('You are already logged in.');
+      throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
-
     return await fetchAccounts(this.page);
   }
 
@@ -52,7 +51,7 @@ export default class XtbPage {
 
   public async addStockToWatchList(fullTicker: string): Promise<void> {
     if (!this.loggedIn) {
-      throw new GraphQLUserFriendlyError('You need to be logged in to add stock to watch list.');
+      throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     await addStockToWatchList(fullTicker, this.page);
   }
@@ -67,7 +66,7 @@ export default class XtbPage {
 
   public async subscribeToPriceChange(pubsub: ApiPubSub): Promise<void> {
     if (!this.loggedIn) {
-      throw new GraphQLUserFriendlyError('You need to be logged in to subscribe to price change.');
+      throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     if (!this.watchPriceChangeIntervalId) {
       this.watchPriceChangeIntervalId = await watchPriceChange(this, pubsub);

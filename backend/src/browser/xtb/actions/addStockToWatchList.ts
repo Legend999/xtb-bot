@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import { clearInput, clickHiddenElement } from 'src/browser/utils.js';
 import { BOT_WATCH_LIST_NAME } from 'src/constants/bot.js';
+import { ONE_SECOND_IN_MILLISECONDS } from 'src/constants/time.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
 
 export default async (fullTicker: string, page: Page) => {
@@ -24,9 +25,14 @@ const findStock = async (fullTicker: string, page: Page) => {
 
   await searchBarInput!.type(fullTicker);
 
-  return await page.waitForSelector(
-    '::-p-xpath(//div[contains(@class, "single-symbol-container") and ' +
-    '(.//span[contains(@class, "asset-class") and (text()="Stock" or text()="Akcje")]) and ' +
-    `.//p[contains(@class, "group-id") and starts-with(normalize-space(text()), "${fullTicker}")]])`,
-  );
+  try {
+    return await page.waitForSelector(
+      '::-p-xpath(//div[contains(@class, "single-symbol-container") and ' +
+      '(.//span[contains(@class, "asset-class") and (text()="Stock" or text()="Akcje" or text()="ETF")]) and ' +
+      `.//p[contains(@class, "group-id") and starts-with(normalize-space(text()), "${fullTicker.toUpperCase()}")]])`,
+      {timeout: ONE_SECOND_IN_MILLISECONDS},
+    );
+  } catch {
+    throw new GraphQLUserFriendlyError('Stock not found.');
+  }
 };
