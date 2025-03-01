@@ -8,7 +8,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import express from 'express';
 import { readFileSync } from 'fs';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { useServer } from 'graphql-ws/use/ws';
 import http from 'http';
 import path from 'path';
 import XtbPage from 'src/browser/xtb/xtbPage.js';

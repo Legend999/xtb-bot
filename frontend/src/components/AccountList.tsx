@@ -1,4 +1,4 @@
-import { useAccountListQuery } from '@graphql/accountList.generated.ts'; // Adjust the path as needed
+import { useAccountListQuery } from '@graphql/accountList.generated.ts';
 import {
   CircularProgress,
   List,

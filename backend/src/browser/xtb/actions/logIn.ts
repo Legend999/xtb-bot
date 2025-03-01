@@ -1,7 +1,7 @@
 import { ElementHandle, HTTPResponse, Page, TimeoutError } from 'puppeteer';
 import { clearInput } from 'src/browser/utils.js';
 import ensureWatchListExists
-  from 'src/browser/xtb/actions/ensureWatchListExists.js';
+  from 'src/browser/xtb/actions/watchlist/ensureWatchListExists.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
 
 export default async (email: string, password: string, page: Page) => {

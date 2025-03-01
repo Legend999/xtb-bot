@@ -1,31 +1,20 @@
-import { ApolloError } from '@apollo/client';
 import {
   useAddStockToWatchListMutation,
 } from '@graphql/addStockToWatchList.generated.ts';
 import useSafeAsync from '@hooks/useSafeAsync.ts';
 import { Box, Button, CircularProgress, TextField } from '@mui/material';
-import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 
 function StockPriceUpdates() {
   const safeAsync = useSafeAsync();
-  const {enqueueSnackbar} = useSnackbar();
   const [fullTicker, setFullTicker] = useState('');
   const [addStockToWatchlist, {loading}] = useAddStockToWatchListMutation();
 
   const isValid = /^[A-Za-z0-9]{1,5}[.][A-Za-z]{2}$/.test(fullTicker);
 
   const handleAddToWatchlist = async () => {
-    try {
-      await addStockToWatchlist({variables: {fullTicker: fullTicker}});
-      setFullTicker('');
-    } catch (error) {
-      if (error instanceof ApolloError) {
-        enqueueSnackbar(error.message, {variant: 'error'});
-      } else {
-        throw error;
-      }
-    }
+    await addStockToWatchlist({variables: {fullTicker: fullTicker}});
+    setFullTicker('');
   };
 
   return (

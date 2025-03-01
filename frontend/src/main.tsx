@@ -21,8 +21,9 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource/montserrat/300.css'; // Light
 import '@fontsource/montserrat/400.css'; // Regular
 import '@fontsource/montserrat/500.css'; // Medium
-import App from 'src/App.tsx';
 import '@fontsource/montserrat/700.css'; // Bold
+import App from 'src/App.tsx';
+import 'src/App.scss';
 
 const httpLink = new HttpLink({
   uri: '/graphql',
@@ -88,6 +89,9 @@ createRoot(document.getElementById('root')!).render(
         anchorOrigin={{horizontal: 'right', vertical: 'top'}}
         Components={{
           error: ErrorNotification,
+        }}
+        classes={{
+          root: 'overwrite-root-notistack',
         }}
       >
         <App/>

@@ -21,6 +21,10 @@ export const resolvers: Resolvers<Context> = {
       await xtbPage.addStockToWatchList(fullTicker);
       return true;
     },
+    removeStockFromWatchList: async (_, {fullTicker}, {xtbPage}) => {
+      await xtbPage.removeStockFromWatchList(fullTicker);
+      return true;
+    },
   },
   Subscription: {
     stocksPriceChange: {

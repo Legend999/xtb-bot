@@ -1,3 +1,4 @@
+import { ApolloError } from '@apollo/client';
 import { useSnackbar } from 'notistack';
 import { useCallback } from 'react';
 
@@ -8,8 +9,12 @@ function useSafeAsync() {
     (asyncFunction: (...args: any[]) => Promise<any>) =>
       (...args: any[]) => {
         asyncFunction(...args).catch((error) => {
-          enqueueSnackbar('An unexpected error occurred. Please try again later.', {variant: 'error'});
-
+          if (error instanceof ApolloError) {
+            enqueueSnackbar(error.message, {variant: 'error'});
+          } else {
+            enqueueSnackbar('An unexpected error occurred. Please try again later.', {variant: 'error'});
+          }
+          
           // eslint-disable-next-line no-console
           console.error(error);
         });
