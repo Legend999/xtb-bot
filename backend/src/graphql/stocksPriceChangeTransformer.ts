@@ -1,10 +1,10 @@
 import {
-  Stock,
   StockPriceChangeData,
   StockPriceChangeError,
+  StockWithPrice,
 } from 'src/graphql/resolvers.generated.js';
 
-const createSuccess = (stocks: Stock[]): Required<StockPriceChangeData> => ({
+const createSuccess = (stocks: StockWithPrice[]): Required<StockPriceChangeData> => ({
   stocks,
   __typename: 'StockPriceChangeData',
 });

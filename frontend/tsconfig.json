@@ -26,6 +26,9 @@
       ],
       "@utils/*": [
         "src/utils/*"
+      ],
+      "@shared/*": [
+        "../shared/*"
       ]
     },
     "skipLibCheck": true,
@@ -41,7 +44,9 @@
     "removeComments": true
   },
   "include": [
-    "src",
-    "vite.config.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "../shared/**/*.ts"
   ]
 }

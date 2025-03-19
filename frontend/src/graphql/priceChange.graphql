@@ -2,7 +2,7 @@ subscription WatchPrice {
     stocksPriceChange {
         ... on StockPriceChangeData {
             stocks {
-                name
+                fullTicker
                 price {
                     ask
                     bid

@@ -9,12 +9,11 @@ function useSafeAsync() {
     (asyncFunction: (...args: any[]) => Promise<any>) =>
       (...args: any[]) => {
         asyncFunction(...args).catch((error) => {
-          if (error instanceof ApolloError) {
-            enqueueSnackbar(error.message, {variant: 'error'});
-          } else {
+          // ApolloErrors are handled by the error link in the ApiProvider.tsx
+          if (!(error instanceof ApolloError)) {
             enqueueSnackbar('An unexpected error occurred. Please try again later.', {variant: 'error'});
           }
-          
+
           // eslint-disable-next-line no-console
           console.error(error);
         });

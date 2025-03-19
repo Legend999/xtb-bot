@@ -1,24 +1,26 @@
 type Query {
     loggedIn: Boolean!
     accountList: [Account!]!
+    stocksInStrategies: [StockInStrategyD!]!
 }
 type Mutation {
     logIn(email: String!, password: String!): Boolean!
     addStockToWatchList(fullTicker: String!): Boolean!
     removeStockFromWatchList(fullTicker: String!): Boolean!
+    addStockToStrategyD(fullTicker: String!, percent: Float!, pricePerLevel: Float!): Boolean!
 }
 type Subscription {
     stocksPriceChange: StocksPriceChangeResult!
 }
 union StocksPriceChangeResult = StockPriceChangeData | StockPriceChangeError
 type StockPriceChangeData {
-    stocks: [Stock!]!
+    stocks: [StockWithPrice!]!
 }
 type StockPriceChangeError {
     errorMessage: String!
 }
-type Stock {
-    name: String!
+type StockWithPrice {
+    fullTicker: String!
     price: StockPrice!
 }
 type StockPrice {
@@ -38,4 +40,9 @@ enum AccountCurrency {
     USD
     EUR
     PLN
+}
+type StockInStrategyD {
+    fullTicker: String!
+    percent: Float!
+    pricePerLevel: Float!
 }

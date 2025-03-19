@@ -1,12 +1,3 @@
-import {
-  ApolloClient,
-  ApolloProvider,
-  HttpLink,
-  InMemoryCache,
-  split,
-} from '@apollo/client';
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions/index';
-import { getMainDefinition } from '@apollo/client/utilities';
 import ErrorNotification from '@components/ErrorNotification.tsx';
 import {
   createTheme,
@@ -14,9 +5,8 @@ import {
   responsiveFontSizes,
   ThemeProvider,
 } from '@mui/material';
-import { Kind, OperationTypeNode } from 'graphql';
-import { createClient } from 'graphql-ws';
 import { SnackbarProvider } from 'notistack';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/montserrat/300.css'; // Light
 import '@fontsource/montserrat/400.css'; // Regular
@@ -24,43 +14,7 @@ import '@fontsource/montserrat/500.css'; // Medium
 import '@fontsource/montserrat/700.css'; // Bold
 import App from 'src/App.tsx';
 import 'src/App.scss';
-
-const httpLink = new HttpLink({
-  uri: '/graphql',
-});
-
-const wsLink = new GraphQLWsLink(createClient({
-  url: '/subscriptions',
-  shouldRetry: () => true,
-  retryAttempts: Infinity,
-}));
-
-const splitLink = split(
-  ({query}) => {
-    const definition = getMainDefinition(query);
-    return (
-      definition.kind === Kind.OPERATION_DEFINITION &&
-      definition.operation === OperationTypeNode.SUBSCRIPTION
-    );
-  },
-  wsLink,
-  httpLink,
-);
-
-const client = new ApolloClient({
-  link: splitLink,
-  cache: new InMemoryCache({
-    typePolicies: {
-      Subscription: {
-        fields: {
-          stocksPriceChange: {
-            merge: false,
-          },
-        },
-      },
-    },
-  }),
-});
+import ApiProvider from 'src/providers/ApiProvider.tsx';
 
 const theme = responsiveFontSizes(
   createTheme({
@@ -81,7 +35,7 @@ const theme = responsiveFontSizes(
 );
 
 createRoot(document.getElementById('root')!).render(
-  <ApolloProvider client={client}>
+  <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline/>
       <SnackbarProvider
@@ -94,8 +48,10 @@ createRoot(document.getElementById('root')!).render(
           root: 'overwrite-root-notistack',
         }}
       >
-        <App/>
+        <ApiProvider>
+          <App/>
+        </ApiProvider>
       </SnackbarProvider>
     </ThemeProvider>
-  </ApolloProvider>,
+  </React.StrictMode>,
 );

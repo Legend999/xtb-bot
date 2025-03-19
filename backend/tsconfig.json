@@ -2,23 +2,38 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "rootDir": "./src",
+    "rootDirs": [
+      "./src",
+      "../shared"
+    ],
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
       "src/*": [
-        "./src/*"
+        "src/*"
+      ],
+      "@shared/*": [
+        "../shared/*"
       ]
     },
     "strict": true,
     "sourceMap": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
     "removeComments": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "es6",
+      "dom"
+    ]
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "../shared/**/*.ts"
   ]
 }

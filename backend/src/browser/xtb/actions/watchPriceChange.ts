@@ -4,7 +4,7 @@ import { BOT_WATCH_LIST_NAME } from 'src/constants/bot.js';
 import { STOCKS_PRICE_CHANGE } from 'src/constants/subscription.js';
 import { ONE_SECOND_IN_MILLISECONDS } from 'src/constants/time.js';
 import ApiPubSub from 'src/graphql/ApiPubSub.js';
-import { Stock } from 'src/graphql/resolvers.generated.js';
+import { StockWithPrice } from 'src/graphql/resolvers.generated.js';
 import StocksPriceChangeGraphqlTransformer
   from 'src/graphql/stocksPriceChangeTransformer.js';
 import { logErrorAndExit } from 'src/utils/errorLogger.js';
@@ -40,19 +40,20 @@ async function getStockPriceChange(page: Page) {
   }
 }
 
-async function fetchStockData(page: Page) {
-  const stockData: Stock[] = await page.evaluate(() => {
+async function fetchStockData(page: Page): Promise<StockWithPrice[]> {
+  return await page.evaluate(() => {
     const targetNode = document.querySelector('.grid-canvas');
 
     return Array.from(targetNode!.querySelectorAll('.slick-row')).map(row => {
-      const name = row.querySelector('.xs-symbol-name')!.getAttribute('title')!.split(',')[0];
+      const fullTicker = row.querySelector('.xs-symbol-name')!.getAttribute('title')!.split(',')[0];
       const cells = row.querySelectorAll('.slick-cell');
       const ask = cells[2].textContent!;
       const bid = cells[3].textContent!;
 
-      return {name, price: {ask: Number(ask), bid: Number(bid)}};
+      return {
+        fullTicker: fullTicker,
+        price: {ask: Number(ask), bid: Number(bid)},
+      };
     });
   });
-
-  return stockData;
 }

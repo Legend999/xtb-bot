@@ -1,0 +1,7 @@
+query StocksInStrategies {
+    stocksInStrategies {
+        fullTicker
+        percent
+        pricePerLevel
+    }
+}

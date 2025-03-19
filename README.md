@@ -20,14 +20,9 @@ These ports are pre-configured and customizable through the .env file.
 
 ### Running locally (Headless/full mode in `.env`)
 
-1. Install [Node.js](https://nodejs.org/en/download/package-manager)
+1. Install [Node.js](https://nodejs.org/en/download/package-manager) and [MariaDB](https://mariadb.com/kb/en/getting-installing-and-upgrading-mariadb/)
 
-2. Install the required dependencies
+2. Start the app:
    ```bash
-   npm install
-   ```
-
-3. Start the app
-   ```bash
-   npm run start
+   ./start.sh
    ```

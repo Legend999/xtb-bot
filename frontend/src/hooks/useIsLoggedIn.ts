@@ -12,16 +12,14 @@ const useIsLoggedIn = (): boolean => {
   } = useLoggedInQuery({fetchPolicy: 'no-cache'});
 
   useEffect(() => {
-    const handlePageShow = () => {
-      if (!document.hidden) {
-        safeAsync(refetch)();
-      }
+    const handleFocus = () => {
+      safeAsync(refetch)();
     };
 
-    window.addEventListener('visibilitychange', handlePageShow);
+    window.addEventListener('focus', handleFocus);
 
     return () => {
-      window.removeEventListener('visibilitychange', handlePageShow);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [refetch, safeAsync]);
 

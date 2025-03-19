@@ -1,9 +1,11 @@
 import { STOCKS_PRICE_CHANGE } from 'src/constants/subscription.js';
+import { AppDataSource } from 'src/dataSource.js';
+import { StrategyD } from 'src/entity/StrategyD.js';
 import { StockPriceChangeType } from 'src/graphql/ApiPubSub.js';
 import {
   Resolvers,
-  Stock,
   StockPrice,
+  StockWithPrice,
 } from 'src/graphql/resolvers.generated.js';
 import { Context } from 'src/server/apolloServer.js';
 
@@ -11,6 +13,10 @@ export const resolvers: Resolvers<Context> = {
   Query: {
     loggedIn: (_, __, {xtbPage}) => xtbPage.getLoggedIn(),
     accountList: async (_, __, {xtbPage}) => await xtbPage.getAccounts(),
+    stocksInStrategies: async () => {
+      const strategyDRepository = AppDataSource.getRepository(StrategyD);
+      return await strategyDRepository.find();
+    },
   },
   Mutation: {
     logIn: async (_, {email, password}, {xtbPage}) => {
@@ -23,6 +29,14 @@ export const resolvers: Resolvers<Context> = {
     },
     removeStockFromWatchList: async (_, {fullTicker}, {xtbPage}) => {
       await xtbPage.removeStockFromWatchList(fullTicker);
+      return true;
+    },
+    addStockToStrategyD: async (_, {
+      fullTicker,
+      percent,
+      pricePerLevel,
+    }, {xtbPage}) => {
+      await xtbPage.addStockToStrategyD(fullTicker, percent, pricePerLevel);
       return true;
     },
   },
@@ -40,9 +54,9 @@ export const resolvers: Resolvers<Context> = {
     number: (account) => account.number,
     type: (account) => account.type,
   },
-  Stock: {
-    name: (stock: Stock) => stock.name,
-    price: (stock: Stock) => stock.price,
+  StockWithPrice: {
+    fullTicker: (stock: StockWithPrice) => stock.fullTicker,
+    price: (stock: StockWithPrice) => stock.price,
   },
   StockPrice: {
     ask: (stockPrice: StockPrice) => stockPrice.ask,
@@ -58,5 +72,10 @@ export const resolvers: Resolvers<Context> = {
   },
   StockPriceChangeError: {
     errorMessage: (payload) => payload.errorMessage,
+  },
+  StockInStrategyD: {
+    fullTicker: (stockInStrategyD) => stockInStrategyD.fullTicker,
+    percent: (stockInStrategyD) => stockInStrategyD.percent,
+    pricePerLevel: (stockInStrategyD) => stockInStrategyD.pricePerLevel,
   },
 };

@@ -2,16 +2,18 @@ import _ from 'lodash';
 import { Browser, Page } from 'puppeteer';
 import { fetchAccounts } from 'src/browser/xtb/actions/fetchAccounts.js';
 import logIn from 'src/browser/xtb/actions/logIn.js';
+import addStockToStrategyD
+  from 'src/browser/xtb/actions/strategy/addStockToStrategyD.js';
 import addStockToWatchList
   from 'src/browser/xtb/actions/watchlist/addStockToWatchList.js';
+import removeStockFromWatchList
+  from 'src/browser/xtb/actions/watchlist/removeStockFromWatchList.js';
 import watchPriceChange from 'src/browser/xtb/actions/watchPriceChange.js';
 import { USER_AGENT } from 'src/constants/page.js';
 import { ONE_SECOND_IN_MILLISECONDS } from 'src/constants/time.js';
 import ApiPubSub, { StockPriceChangeType } from 'src/graphql/ApiPubSub.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
 import { Account } from 'src/graphql/resolvers.generated.js';
-import removeStockFromWatchList
-  from 'src/browser/xtb/actions/watchlist/removeStockFromWatchList.js';
 
 export default class XtbPage {
   public readonly page: Page;
@@ -63,6 +65,13 @@ export default class XtbPage {
       throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     await removeStockFromWatchList(fullTicker, this.page);
+  }
+
+  public async addStockToStrategyD(fullTicker: string, percent: number, pricePerLevel: number): Promise<void> {
+    if (!this.loggedIn) {
+      throw new GraphQLUserFriendlyError('You need to be logged in.');
+    }
+    await addStockToStrategyD(fullTicker, percent, pricePerLevel);
   }
 
   public checkStockPriceChangeAndUpdate(newStockPrices: StockPriceChangeType): boolean {

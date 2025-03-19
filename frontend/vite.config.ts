@@ -4,7 +4,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import { getValidPortNumber } from './src/utils/port.ts';
+import { getValidPortNumber } from '../shared/utils/port.ts';
 
 dotenv.config({path: path.resolve(import.meta.dirname, '../.env')});
 

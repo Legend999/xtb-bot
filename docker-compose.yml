@@ -1,10 +1,29 @@
 services:
-  xtb-bot:
+  db:
+    image: mysql:8.4
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_TCP_PORT: ${DB_PORT}
+    expose:
+      - ${DB_PORT}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    env_file: .env
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${DB_ROOT_PASSWORD}" ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  app:
     build:
       context: .
-      args:
-        FE_PORT: ${FE_PORT}
-        BE_PORT: ${BE_PORT}
+    expose:
+      - ${FE_PORT}
+      - ${BE_PORT}
     ports:
       - "${FE_PORT}:${FE_PORT}"
       - "${BE_PORT}:${BE_PORT}"
@@ -12,6 +31,12 @@ services:
       - .:/app
       - node_modules_docker:/app/node_modules
     env_file: .env
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   node_modules_docker:
+  mysql_data:

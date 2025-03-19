@@ -1,0 +1,3 @@
+mutation AddStockToStrategyD($fullTicker: String!, $percent: Float!, $pricePerLevel: Float!) {
+    addStockToStrategyD(fullTicker: $fullTicker, percent: $percent, pricePerLevel: $pricePerLevel)
+}
