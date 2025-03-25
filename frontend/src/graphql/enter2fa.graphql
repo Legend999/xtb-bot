@@ -1,0 +1,3 @@
+mutation Enter2FA($code: String!) {
+    enter2fa(code: $code)
+}

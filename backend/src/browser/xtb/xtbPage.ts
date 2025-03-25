@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { Browser, Page } from 'puppeteer';
+import enter2fa from 'src/browser/xtb/actions/enter2fa.js';
 import { fetchAccounts } from 'src/browser/xtb/actions/fetchAccounts.js';
 import logIn from 'src/browser/xtb/actions/logIn.js';
 import addStockToStrategyD
@@ -13,13 +14,13 @@ import { USER_AGENT } from 'src/constants/page.js';
 import { ONE_SECOND_IN_MILLISECONDS } from 'src/constants/time.js';
 import ApiPubSub, { StockPriceChangeType } from 'src/graphql/ApiPubSub.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
-import { Account } from 'src/graphql/resolvers.generated.js';
+import { Account, LogInStatus } from 'src/graphql/resolvers.generated.js';
 
 export default class XtbPage {
   public readonly page: Page;
   private lastStockPrices: StockPriceChangeType | null = null;
   private watchPriceChangeIntervalId: NodeJS.Timeout | null = null;
-  private loggedIn: boolean = false;
+  private logInStatus: LogInStatus = LogInStatus.LoggedOut;
 
   private constructor(page: Page) {
     this.page = page;
@@ -34,41 +35,57 @@ export default class XtbPage {
     return new XtbPage(page);
   }
 
-  public getLoggedIn(): boolean {
-    return this.loggedIn;
+  public getLogInStatus(): LogInStatus {
+    return this.logInStatus;
+  }
+
+  public setLogInStatus(logInStatus: LogInStatus): void {
+    this.logInStatus = logInStatus;
   }
 
   public async getAccounts(): Promise<Account[]> {
-    if (!this.loggedIn) {
+    if (this.logInStatus !== LogInStatus.Success) {
       throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     return await fetchAccounts(this.page);
   }
 
   public async logIn(email: string, password: string): Promise<void> {
-    if (this.loggedIn) {
-      throw new GraphQLUserFriendlyError('You are already logged in.');
+    switch (this.logInStatus) {
+      case LogInStatus.Success:
+        throw new GraphQLUserFriendlyError('You are already logged in.');
+      case LogInStatus.Require_2Fa:
+        throw new GraphQLUserFriendlyError('You need to enter 2FA code.');
+      case LogInStatus.LoggedOut:
+        this.logInStatus = await logIn(email, password, this.page);
     }
-    await logIn(email, password, this.page);
-    this.loggedIn = true;
+  }
+
+  public async enter2fa(code: string): Promise<void> {
+    if (this.logInStatus !== LogInStatus.Require_2Fa) {
+      throw new GraphQLUserFriendlyError('2FA is not required now.');
+    }
+    await enter2fa(code, this);
+
+    this.logInStatus = LogInStatus.Success;
   }
 
   public async addStockToWatchList(fullTicker: string): Promise<void> {
-    if (!this.loggedIn) {
+    if (this.logInStatus !== LogInStatus.Success) {
       throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     await addStockToWatchList(fullTicker, this.page);
   }
 
   public async removeStockFromWatchList(fullTicker: string): Promise<void> {
-    if (!this.loggedIn) {
+    if (this.logInStatus !== LogInStatus.Success) {
       throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     await removeStockFromWatchList(fullTicker, this.page);
   }
 
   public async addStockToStrategyD(fullTicker: string, percent: number, pricePerLevel: number): Promise<void> {
-    if (!this.loggedIn) {
+    if (this.logInStatus !== LogInStatus.Success) {
       throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     await addStockToStrategyD(fullTicker, percent, pricePerLevel);
@@ -83,7 +100,7 @@ export default class XtbPage {
   }
 
   public async subscribeToPriceChange(pubsub: ApiPubSub): Promise<void> {
-    if (!this.loggedIn) {
+    if (this.logInStatus !== LogInStatus.Success) {
       throw new GraphQLUserFriendlyError('You need to be logged in.');
     }
     if (!this.watchPriceChangeIntervalId) {

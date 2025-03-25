@@ -1,10 +1,11 @@
 type Query {
-    loggedIn: Boolean!
+    logInStatus: LogInStatus!
     accountList: [Account!]!
     stocksInStrategies: [StockInStrategyD!]!
 }
 type Mutation {
     logIn(email: String!, password: String!): Boolean!
+    enter2fa(code: String!): Boolean!
     addStockToWatchList(fullTicker: String!): Boolean!
     removeStockFromWatchList(fullTicker: String!): Boolean!
     addStockToStrategyD(fullTicker: String!, percent: Float!, pricePerLevel: Float!): Boolean!
@@ -26,6 +27,11 @@ type StockWithPrice {
 type StockPrice {
     ask: Float!
     bid: Float!
+}
+enum LogInStatus {
+    SUCCESS
+    REQUIRE_2FA
+    LOGGED_OUT
 }
 type Account {
     type: AccountType!

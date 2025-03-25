@@ -11,7 +11,7 @@ import { Context } from 'src/server/apolloServer.js';
 
 export const resolvers: Resolvers<Context> = {
   Query: {
-    loggedIn: (_, __, {xtbPage}) => xtbPage.getLoggedIn(),
+    logInStatus: (_, __, {xtbPage}) => xtbPage.getLogInStatus(),
     accountList: async (_, __, {xtbPage}) => await xtbPage.getAccounts(),
     stocksInStrategies: async () => {
       const strategyDRepository = AppDataSource.getRepository(StrategyD);
@@ -21,6 +21,10 @@ export const resolvers: Resolvers<Context> = {
   Mutation: {
     logIn: async (_, {email, password}, {xtbPage}) => {
       await xtbPage.logIn(email, password);
+      return true;
+    },
+    enter2fa: async (_, {code}, {xtbPage}) => {
+      await xtbPage.enter2fa(code);
       return true;
     },
     addStockToWatchList: async (_, {fullTicker}, {xtbPage}) => {

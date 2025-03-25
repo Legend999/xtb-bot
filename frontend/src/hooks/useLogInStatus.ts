@@ -1,15 +1,16 @@
-import { useLoggedInQuery } from '@graphql/loggedIn.generated.ts';
+import { LogInStatus } from '@graphql/graphql-types.generated.ts';
+import { useLogInStatusQuery } from '@graphql/logInStatus.generated.ts';
 import useSafeAsync from '@hooks/useSafeAsync.ts';
 import { useEffect } from 'react';
 
-const useIsLoggedIn = (): boolean => {
+const useLogInStatus = (): LogInStatus => {
   const safeAsync = useSafeAsync();
   const {
     data,
     loading,
     error,
     refetch,
-  } = useLoggedInQuery({fetchPolicy: 'no-cache'});
+  } = useLogInStatusQuery({fetchPolicy: 'no-cache'});
 
   useEffect(() => {
     const handleFocus = () => {
@@ -23,9 +24,9 @@ const useIsLoggedIn = (): boolean => {
     };
   }, [refetch, safeAsync]);
 
-  if (loading) return false;
-  if (error) return false;
-  return data?.loggedIn ?? false;
+  if (loading || error || !data) return LogInStatus.LoggedOut;
+
+  return data.logInStatus;
 };
 
-export default useIsLoggedIn;
+export default useLogInStatus;

@@ -1,5 +1,3 @@
-import { LoggedInDocument } from '@graphql/loggedIn.generated.ts';
-import { useLogInMutation } from '@graphql/logIn.generated';
 import useSafeAsync from '@hooks/useSafeAsync.ts';
 import {
   Box,
@@ -7,20 +5,26 @@ import {
   CircularProgress,
   keyframes,
   Paper,
-  TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { ReactNode } from 'react';
 
-function LogInForm() {
+interface LogInFormWrapperProps {
+  children: ReactNode;
+  loading: boolean;
+  onSubmit: () => Promise<void>;
+}
+
+function LoginFormWrapper({
+  children,
+  loading,
+  onSubmit,
+}: LogInFormWrapperProps) {
   const safeAsync = useSafeAsync();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [logIn, {loading}] = useLogInMutation({refetchQueries: [LoggedInDocument]});
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    await logIn({variables: {email, password}});
+    await onSubmit();
   };
 
   const gradientAnimation = keyframes`
@@ -68,22 +72,7 @@ function LogInForm() {
         gap: '1rem',
       }}
       >
-        <TextField
-          label="Email"
-          type="email"
-          value={email}
-          onChange={(e) => { setEmail(e.target.value); }}
-          required
-          fullWidth
-        />
-        <TextField
-          label="Password"
-          type="password"
-          value={password}
-          onChange={(e) => { setPassword(e.target.value); }}
-          required
-          fullWidth
-        />
+        {children}
         <Button
           type="submit"
           variant="contained"
@@ -102,4 +91,4 @@ function LogInForm() {
   );
 }
 
-export default LogInForm;
+export default LoginFormWrapper;

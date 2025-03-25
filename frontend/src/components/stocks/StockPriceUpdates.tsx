@@ -222,7 +222,7 @@ function StockPriceUpdates() {
   return (
     <>
       <Typography variant="h4" gutterBottom sx={{fontWeight: 500}}>
-        Stock Price Updates
+        Watchlist
       </Typography>
       <AddStockToWatchList/>
       <TableContainer component={Paper}>

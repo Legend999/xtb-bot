@@ -1,10 +1,10 @@
-import { ElementHandle, HTTPResponse, Page, TimeoutError } from 'puppeteer';
-import { clearInput } from 'src/browser/utils.js';
-import ensureWatchListExists
-  from 'src/browser/xtb/actions/watchlist/ensureWatchListExists.js';
+import { ElementHandle, Page, TimeoutError } from 'puppeteer';
+import { clearInput, getTextContent } from 'src/browser/utils.js';
+import postLoginCheck from 'src/browser/xtb/actions/postLoginCheck.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
+import { LogInStatus } from 'src/graphql/resolvers.generated.js';
 
-export default async (email: string, password: string, page: Page) => {
+export default async (email: string, password: string, page: Page): Promise<LogInStatus> => {
   const loginInput = await page.waitForSelector('input[name=\'xslogin\']');
   const passwordInput = await page.waitForSelector('input[name=\'xspass\']');
   const loginButton = await page.waitForSelector('input.xs-btn.xs-btn-ok-login');
@@ -16,16 +16,28 @@ export default async (email: string, password: string, page: Page) => {
   await passwordInput!.type(password);
   await loginButton!.click();
 
-  try {
-    const result: HTTPResponse | ElementHandle<HTMLDivElement> | null = await Promise.race([
-      page.waitForNavigation(),
-      page.waitForSelector('div.xs-error-msg > div'),
-    ]);
+  const logInStatus = await getLogInStatus(page);
 
-    if (result instanceof ElementHandle) {
-      const errorMessage = await result.evaluate((element) => element.textContent);
-      throw new GraphQLUserFriendlyError(errorMessage!);
-    }
+  if (logInStatus === LogInStatus.Success) {
+    await postLoginCheck(page);
+  }
+
+  return logInStatus;
+};
+
+const getLogInStatus = async (page: Page): Promise<LogInStatus> => {
+  try {
+    return await Promise.race([
+      page.waitForNavigation().then(() => LogInStatus.Success),
+      page.waitForSelector('xs6-two-factor-authentication >>> .two-factor-auth .pds-button--style--primary', {visible: true}).then(async (result: ElementHandle | null) => {
+        await result!.click();
+        return LogInStatus.Require_2Fa;
+      }),
+      page.waitForSelector('div.xs-error-msg > div').then(async (result: ElementHandle | null) => {
+        const errorMessage = await getTextContent(result!);
+        return Promise.reject(new GraphQLUserFriendlyError(errorMessage));
+      }),
+    ]);
   } catch (e: unknown) {
     if (e instanceof TimeoutError) {
       await page.reload();
@@ -33,28 +45,4 @@ export default async (email: string, password: string, page: Page) => {
     }
     throw e;
   }
-
-  // Account value is (one of) the last element(s) to load, ensuring actions occur on a fully loaded page to prevent errors
-  await fetchAccountValue(page);
-
-  await ensureWatchListExists(page);
-};
-
-const fetchAccountValue = async (page: Page) => {
-  const accountValueElement = await page.waitForFunction<unknown[], () => HTMLSpanElement | false>(() => {
-    const balanceSummary = document.querySelector('xs6-balance-summary');
-    if (!balanceSummary) return false;
-    const shadowRoot = balanceSummary.shadowRoot;
-    if (!shadowRoot) return false;
-    const accountValueElement = shadowRoot.querySelector<HTMLSpanElement>('.account-value .neutral');
-    if (!accountValueElement || accountValueElement.textContent === '0.00') return false;
-    return accountValueElement;
-  }) as ElementHandle<HTMLSpanElement>;
-
-  return await page.evaluate<
-    [ElementHandle<HTMLSpanElement>], (accountValueElement: HTMLSpanElement) => string
-  >(
-    (accountValueElement: HTMLSpanElement) => accountValueElement.textContent!,
-    accountValueElement,
-  );
 };
