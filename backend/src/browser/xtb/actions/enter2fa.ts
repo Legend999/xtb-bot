@@ -1,5 +1,5 @@
-import { ElementHandle } from 'puppeteer';
-import { clearInput, getTextContent } from 'src/browser/utils.js';
+import { Page } from 'puppeteer';
+import { getTextContent } from 'src/browser/utils.js';
 import postLoginCheck from 'src/browser/xtb/actions/postLoginCheck.js';
 import XtbPage from 'src/browser/xtb/xtbPage.js';
 import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
@@ -13,23 +13,19 @@ export default async (code: string, xtbPage: XtbPage) => {
   }
 
   const page = xtbPage.page;
-  const twoFaInput = await page.$('xs6-two-factor-authentication >>> #otpCode');
-  const twoFaButton = await page.$('xs6-two-factor-authentication >>> .otp-step-container__btn');
+  const twoFaInput = page.locator('xs6-two-factor-authentication >>> #otpCode');
+  const twoFaButton = page.locator('xs6-two-factor-authentication >>> .otp-step-container__btn');
+  await twoFaInput.fill(code);
+  await twoFaButton.click();
 
-  await clearInput(twoFaInput!);
-  await twoFaInput!.type(code);
-  await twoFaButton!.click();
+  const goToAddTrustedDeviceButton = page.locator('xs6-two-factor-authentication >>> xs6-path-selection-step-container .pds-button--style--primary')
+    .setVisibility('visible');
 
-  const goToAddTrustedDeviceButton = await Promise.race([
-    page.waitForSelector('xs6-two-factor-authentication >>> xs6-path-selection-step-container .pds-button--style--primary', {visible: true}),
-    page.waitForSelector('xs6-two-factor-authentication >>> xs6-otp-step-container .pds-helper-text__text').then(async (result: ElementHandle | null) => {
-      const errorMessage = await getTextContent(result!);
-      return Promise.reject(new GraphQLUserFriendlyError(errorMessage));
-    }),
+  await Promise.race([
+    goToAddTrustedDeviceButton.click(),
+    handle2faHelperText(xtbPage.page),
     handleXtbError(xtbPage),
   ]);
-
-  await goToAddTrustedDeviceButton!.click();
 
   await addTrustedDevice(xtbPage);
 
@@ -39,38 +35,49 @@ export default async (code: string, xtbPage: XtbPage) => {
 async function addTrustedDevice(xtbPage: XtbPage): Promise<void> {
   const page = xtbPage.page;
 
-  const deviceNameInput = await Promise.race([
-    page.waitForSelector('xs6-two-factor-authentication >>> xs6-add-device-step-container #deviceName'),
-    handleXtbError(xtbPage),
-  ]);
-  await clearInput(deviceNameInput!);
-  await deviceNameInput!.type('XTB Bot');
-
-  const itsMyDeviceConfirmationCheckbox = await page.$('xs6-two-factor-authentication >>> xs6-add-device-step-container .pds-checkbox__native-control');
-  await itsMyDeviceConfirmationCheckbox!.click();
-
-  const addTrustedDeviceButton = await page.$('xs6-two-factor-authentication >>> xs6-add-device-step-container .pds-button--style--primary');
-  await addTrustedDeviceButton!.click();
-
-  const goToPlatformButton = await Promise.race([
-    page.waitForSelector('xs6-two-factor-authentication >>> xs6-trusted-device-added-step-container .pds-button--style--primary'),
+  const deviceNameInput = page.locator('xs6-two-factor-authentication >>> xs6-add-device-step-container #deviceName');
+  await Promise.race([
+    deviceNameInput.fill('XTB Bot'),
     handleXtbError(xtbPage),
   ]);
 
-  await goToPlatformButton!.click();
+  const itsMyDeviceConfirmationCheckbox = page.locator('xs6-two-factor-authentication >>> xs6-add-device-step-container .pds-checkbox__native-control');
+  await itsMyDeviceConfirmationCheckbox.click();
+
+  const addTrustedDeviceButton = page.locator('xs6-two-factor-authentication >>> xs6-add-device-step-container .pds-button--style--primary');
+  await addTrustedDeviceButton.click();
+
+  const goToPlatformButton = page.locator('xs6-two-factor-authentication >>> xs6-trusted-device-added-step-container .pds-button--style--primary');
+  await Promise.race([
+    goToPlatformButton.click(),
+    handleXtbError(xtbPage),
+  ]);
 
   await page.waitForNavigation();
 }
 
+async function handle2faHelperText(page: Page) {
+  // locator doesn't work because element is dynamically created
+  const helperTextHandle = await page.waitForFunction(() => {
+    const shadowHost = document.querySelector('xs6-two-factor-authentication');
+    return shadowHost?.shadowRoot?.querySelector('.pds-helper-text__text');
+  });
+  const helperText = await getTextContent(helperTextHandle.asElement()!);
+  await helperTextHandle.dispose();
+
+  throw new GraphQLUserFriendlyError(helperText);
+}
+
 async function handleXtbError(xtbPage: XtbPage) {
   const page = xtbPage.page;
-  return page.waitForSelector('xs6-two-factor-authentication >>> xs6-error-step-container .error-step-container__body-heading', {visible: true}).then(async (result: ElementHandle | null) => {
-    const errorMessage = await getTextContent(result!);
+  const errorMessage = await page.locator('xs6-two-factor-authentication >>> xs6-error-step-container .error-step-container__body-heading')
+    .setVisibility('visible')
+    .map(element => element.textContent!)
+    .wait();
 
-    const goBackToLogInButton = await page.$('xs6-two-factor-authentication >>> xs6-error-step-container .error-step-container__button');
-    await goBackToLogInButton!.click();
-    xtbPage.setLogInStatus(LogInStatus.LoggedOut);
+  const goBackToLogInButton = page.locator('xs6-two-factor-authentication >>> xs6-error-step-container .error-step-container__button');
+  await goBackToLogInButton.click();
+  xtbPage.setLogInStatus(LogInStatus.LoggedOut);
 
-    return Promise.reject(new GraphQLUserFriendlyError(`XTB reported an error: ${errorMessage}`));
-  });
+  throw new GraphQLUserFriendlyError(`XTB reported an error: ${errorMessage}`);
 }

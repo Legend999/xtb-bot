@@ -5,13 +5,16 @@ import GraphQLUserFriendlyError from 'src/graphql/GraphQLUserFriendlyError.js';
 
 export default async (fullTicker: string, page: Page, targetSelection: boolean) => {
   const stockContainer = await findStock(fullTicker, page);
-  await stockContainer!.hover(); // Hover to make 'Add to Group' button available when added stock isn't first (e.g., CFD is first)
+  await stockContainer.hover(); // Hover to make 'Add to Group' button available when added stock isn't first (e.g., CFD is first)
 
-  const addToGroupButton = await stockContainer!.$('.xs-button-icon.xs-button-add-to-group');
+  const addToGroupButton = await stockContainer.$('.xs-button-icon.xs-button-add-to-group');
   await addToGroupButton!.click();
 
-  const addToWatchListCheckboxItem = await page.waitForSelector(`::-p-xpath(//li[.//span[text()="${BOT_WATCH_LIST_NAME}"]])`);
-  const isSelected = await addToWatchListCheckboxItem!.evaluate(el => el.classList.contains('selected'));
+  await stockContainer.dispose();
+  await addToGroupButton!.dispose();
+
+  const addToWatchListCheckboxItem = page.locator(`::-p-xpath(//li[.//span[text()="${BOT_WATCH_LIST_NAME}"]])`);
+  const isSelected = await addToWatchListCheckboxItem.map(element => element.classList.contains('selected')).wait();
 
   if (isSelected && targetSelection) {
     throw new GraphQLUserFriendlyError('Stock is already on the watch list.');
@@ -20,5 +23,5 @@ export default async (fullTicker: string, page: Page, targetSelection: boolean) 
     throw new GraphQLUserFriendlyError('Stock is not on the watch list.');
   }
 
-  await addToWatchListCheckboxItem!.click();
+  await addToWatchListCheckboxItem.click();
 }

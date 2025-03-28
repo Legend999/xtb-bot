@@ -14,22 +14,22 @@
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
-    "@graphql-tools/schema": "^10.0.20",
+    "@graphql-tools/schema": "^10.0.23",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "graphql-subscriptions": "^3.0.0",
     "lodash": "^4.17.21",
-    "mysql2": "^3.13.0",
-    "puppeteer": "^23.11.1",
+    "mysql2": "^3.14.0",
+    "puppeteer": "^24.4.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.21",
     "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/lodash": "^4.17.15",
-    "@types/node": "^22.13.10",
-    "eslint-plugin-n": "^17.15.1",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.13.14",
+    "eslint-plugin-n": "^17.17.0",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.3"
   }

@@ -1,5 +1,4 @@
-import { ElementHandle, Page } from 'puppeteer';
-import { getTextContent } from 'src/browser/utils.js';
+import { Page } from 'puppeteer';
 import ensureWatchListExists
   from 'src/browser/xtb/actions/watchlist/ensureWatchListExists.js';
 
@@ -10,15 +9,13 @@ export default async (page: Page) => {
 };
 
 const fetchAccountValue = async (page: Page) => {
-  const accountValueElement = await page.waitForFunction<unknown[], () => HTMLSpanElement | false>(() => {
+  return await page.waitForFunction(() => {
     const balanceSummary = document.querySelector('xs6-balance-summary');
-    if (!balanceSummary) return false;
+    if (!balanceSummary) return null;
     const shadowRoot = balanceSummary.shadowRoot;
-    if (!shadowRoot) return false;
-    const accountValueElement = shadowRoot.querySelector<HTMLSpanElement>('.account-value .neutral');
-    if (!accountValueElement || accountValueElement.textContent === '0.00') return false;
+    if (!shadowRoot) return null;
+    const accountValueElement = shadowRoot.querySelector('.account-value .neutral');
+    if (!accountValueElement || accountValueElement.textContent === '0.00') return null;
     return accountValueElement;
-  }) as ElementHandle<HTMLSpanElement>;
-
-  return await getTextContent(accountValueElement);
+  });
 };

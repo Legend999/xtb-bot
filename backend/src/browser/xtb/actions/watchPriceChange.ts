@@ -10,11 +10,13 @@ import StocksPriceChangeGraphqlTransformer
 import { logErrorAndExit } from 'src/utils/errorLogger.js';
 
 export default async (xtbPage: XtbPage, pubsub: ApiPubSub): Promise<NodeJS.Timeout> => {
-  const watchListMenuButton = await xtbPage.page.waitForSelector('.mws-menu-more-box');
-  await watchListMenuButton!.click();
+  const page = xtbPage.page;
 
-  const xtbBotWatchList = await xtbPage.page.waitForSelector(`::-p-xpath(//button[.//span[@title="${BOT_WATCH_LIST_NAME}"]])`);
-  await xtbBotWatchList!.click();
+  const watchListMenuButton = page.locator('.mws-menu-more-box');
+  await watchListMenuButton.click();
+
+  const xtbBotWatchList = page.locator(`::-p-xpath(//button[.//span[@title="${BOT_WATCH_LIST_NAME}"]])`);
+  await xtbBotWatchList.click();
 
   return setInterval(() => { // poll instead of MutationObserver to avoid logging frequent updates that are unnecessary
     handleStockDataInterval(xtbPage, pubsub).catch(logErrorAndExit);
