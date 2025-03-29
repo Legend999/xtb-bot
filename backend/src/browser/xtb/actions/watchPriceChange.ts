@@ -49,12 +49,12 @@ async function fetchStockData(page: Page): Promise<StockWithPrice[]> {
     return Array.from(targetNode!.querySelectorAll('.slick-row')).map(row => {
       const fullTicker = row.querySelector('.xs-symbol-name')!.getAttribute('title')!.split(',')[0];
       const cells = row.querySelectorAll('.slick-cell');
-      const ask = cells[2].textContent!;
-      const bid = cells[3].textContent!;
+      const bid = cells[2].textContent!;
+      const ask = cells[3].textContent!;
 
       return {
         fullTicker: fullTicker,
-        price: {ask: Number(ask), bid: Number(bid)},
+        price: {bid: Number(bid), ask: Number(ask)},
       };
     });
   });

@@ -75,7 +75,8 @@ async function handleXtbError(xtbPage: XtbPage) {
     .map(element => element.textContent!)
     .wait();
 
-  const goBackToLogInButton = page.locator('xs6-two-factor-authentication >>> xs6-error-step-container .error-step-container__button');
+  const goBackToLogInButton = page.locator('xs6-two-factor-authentication >>> xs6-error-step-container .error-step-container__button')
+    .setVisibility('visible');
   await goBackToLogInButton.click();
   xtbPage.setLogInStatus(LogInStatus.LoggedOut);
 

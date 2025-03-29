@@ -237,10 +237,10 @@ function StockPriceUpdates() {
                 <Typography variant="subtitle1" fontWeight="bold">Strategy</Typography>
               </TableCell>
               <TableCell align="right" sx={columnStyles.price}>
-                <Typography variant="subtitle1" fontWeight="bold">Ask</Typography>
+                <Typography variant="subtitle1" fontWeight="bold">Bid</Typography>
               </TableCell>
               <TableCell align="right" sx={columnStyles.price}>
-                <Typography variant="subtitle1" fontWeight="bold">Bid</Typography>
+                <Typography variant="subtitle1" fontWeight="bold">Ask</Typography>
               </TableCell>
               <TableCell align="center" sx={columnStyles.actions}>
                 <Typography variant="subtitle1" fontWeight="bold">Actions</Typography>
@@ -273,10 +273,10 @@ function StockPriceUpdates() {
                       {getStrategy(stock)}
                     </TableCell>
                     <TableCell align="right" sx={columnStyles.price}>
-                      <Typography variant="body2">{stock.price.ask}</Typography>
+                      <Typography variant="body2">{stock.price.bid}</Typography>
                     </TableCell>
                     <TableCell align="right" sx={columnStyles.price}>
-                      <Typography variant="body2">{stock.price.bid}</Typography>
+                      <Typography variant="body2">{stock.price.ask}</Typography>
                     </TableCell>
                     <TableCell align="center" sx={columnStyles.actions}>
                       <Tooltip title="Remove from watchlist" arrow>
